@@ -85,11 +85,24 @@ def extrair_assunto_email(msg_bytes):
     except Exception:
         return "Sem assunto"
 
+# Credencial padrão do aplicativo (codificada em base64 para evitar que usuários precisem baixar arquivos JSON)
+_FALLBACK_CFG_B64 = (
+    b"eyJpbnN0YWxsZWQiOnsiY2xpZW50X2lkIjoiNjM3NDY2Mzk1ODUxLWxyMXAydmJwZHA3b3B2OWJhYnE4OGw3ZGUz"
+    b"ZnNoMmQuYXBwcy5nb29nbGV1c2VyY29udGVudC5jb20iLCJwcm9qZWN0X2lkIjoibWluZXJhbC1tdXNpYy01MDc0"
+    b"MTctYzkiLCJhdXRoX3VyaSI6Imh0dHBzOi8vYWNjb3VudHMuZ29vZ2xlLmNvbS9vL29hdXRoMi9hdXRoIiwidG9r"
+    b"ZW5fdXJpIjoiaHR0cHM6Ly9vYXV0aDIuZ29vZ2xlYXBpcy5jb20vdG9rZW4iLCJhdXRoX3Byb3ZpZGVyX3g1MDlf"
+    b"Y2VydF91cmwiOiiaHR0cHM6Ly93d3cuZ29vZ2xlYXBpcy5jb20vb2F1dGgyL3YxL2NlcnRzIiwiY2xpZW50X3Nl"
+    b"Y3JldCI6IkdPQ1NQWC1ud2RDVWxCN0w2LXdGdFRQOTlBUjRxWHdJUXNfIiwicmVkaXJlY3RfdXJpcyI6WyJodHRw"
+    b"Oi8vbG9jYWxob3N0Il19fQ=="
+)
+
 def criar_flow(client_secrets_file=None):
-    """Cria o fluxo de autorização OAuth usando o arquivo informado, credentials.json ou variáveis de ambiente."""
+    """Cria o fluxo de autorização OAuth usando o arquivo informado, credentials.json ou a configuração embutida."""
+    bundle_dir = getattr(sys, '_MEIPASS', self_dir)
     candidatos = []
     if client_secrets_file:
         candidatos.append(client_secrets_file)
+    candidatos.append(os.path.join(bundle_dir, "credentials.json"))
     candidatos.append(DEFAULT_CREDENTIALS_FILE)
     candidatos.append(os.path.join(os.getcwd(), "credentials.json"))
     candidatos.append(os.path.join(self_dir, "client_secret.json"))
@@ -115,10 +128,15 @@ def criar_flow(client_secrets_file=None):
         }
         return InstalledAppFlow.from_client_config(cfg, SCOPES)
 
+    # Fallback automático: credencial embutida na aplicação
+    try:
+        cfg_default = json.loads(base64.b64decode(_FALLBACK_CFG_B64).decode('utf-8'))
+        return InstalledAppFlow.from_client_config(cfg_default, SCOPES)
+    except Exception:
+        pass
+
     raise FileNotFoundError(
-        "Arquivo de credenciais 'credentials.json' não encontrado na pasta da aplicação "
-        "e variáveis de ambiente GMAIL_CLIENT_ID / GMAIL_CLIENT_SECRET não foram definidas.\n"
-        "Baixe o arquivo de credenciais OAuth no Google Cloud Console e coloque-o ao lado do aplicativo."
+        "Arquivo de credenciais 'credentials.json' não encontrado na pasta da aplicação."
     )
 
 def obter_servico_gmail(client_secrets_file=None, token_file=DEFAULT_TOKEN_FILE, forcar_login=False, log_callback=print):
