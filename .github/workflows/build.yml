@@ -1,0 +1,100 @@
+name: Compilar Executáveis (Windows e Linux)
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Compilar para ${{ matrix.target_os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            target_os: Windows
+            output_name: GmailBackup-Windows.exe
+            dist_path: dist/GmailBackup-Windows.exe
+            pyinstaller_cmd: pyinstaller --clean --onefile --noconsole --name "GmailBackup-Windows" app.py
+
+          - os: ubuntu-latest
+            target_os: Linux
+            output_name: GmailBackup-Linux
+            dist_path: dist/GmailBackup-Linux
+            pyinstaller_cmd: pyinstaller --clean --onefile --noconsole --name "GmailBackup-Linux" app.py
+
+    steps:
+      - name: Baixar Código Fonte
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+          cache: 'pip'
+
+      - name: Instalar Dependências do Sistema (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libgl1 \
+            libegl1 \
+            libxkbcommon-x11-0 \
+            libxcb-icccm4 \
+            libxcb-image0 \
+            libxcb-keysyms1 \
+            libxcb-randr0 \
+            libxcb-render-util0 \
+            libxcb-xinerama0 \
+            libxcb-xfixes0
+
+      - name: Instalar Dependências Python
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Gerar Executável com PyInstaller
+        run: ${{ matrix.pyinstaller_cmd }}
+
+      - name: Salvar Artefato de Compilação
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.output_name }}
+          path: ${{ matrix.dist_path }}
+          if-no-files-found: error
+
+  release:
+    name: Publicar Release no GitHub
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Baixar Código Fonte
+        uses: actions/checkout@v4
+
+      - name: Baixar Executável Windows
+        uses: actions/download-artifact@v4
+        with:
+          name: GmailBackup-Windows.exe
+          path: release_files
+
+      - name: Baixar Executável Linux
+        uses: actions/download-artifact@v4
+        with:
+          name: GmailBackup-Linux
+          path: release_files
+
+      - name: Criar GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release_files/*
+          generate_release_notes: true

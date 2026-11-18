@@ -1,0 +1,94 @@
+# =======================================================
+# SEGURANÇA E CREDENCIAIS (NUNCA SUBIR AO REPOSITÓRIO)
+# =======================================================
+# Arquivos de credenciais e tokens da Google Cloud / Gmail API
+credencial.json
+credencial*.json
+credentials.json
+credentials*.json
+client_secret*.json
+client_secrets*.json
+service_account*.json
+token.json
+token*.json
+*.pickle
+
+# Chaves privadas e certificados
+*.key
+*.pem
+*.p12
+*.pfx
+
+# Variáveis de ambiente e segredos
+.env
+.env.*
+!.env.example
+
+# =======================================================
+# DADOS DE BACKUP E CONTEÚDO DOS E-MAILS (PRIVACIDADE)
+# =======================================================
+# Pastas e arquivos de e-mails baixados
+backup_emails/
+backup_emails*/
+novobckemail/
+novobckemail*/
+manoel/
+NGD/
+
+# Arquivos de e-mail brutos e arquivos compactados
+*.eml
+*.msg
+*.zip
+*.tar.gz
+*.rar
+*.7z
+
+# =======================================================
+# AMBIENTES VIRTUAIS (PYTHON VENV)
+# =======================================================
+.venv/
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# =======================================================
+# BYTECODE E CACHE DO PYTHON
+# =======================================================
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.coverage
+htmlcov/
+
+# =======================================================
+# BUILDS E EMPACOTAMENTO (PyInstaller, setuptools, etc.)
+# =======================================================
+build/
+dist/
+*.egg-info/
+*.egg
+*.manifest
+
+# =======================================================
+# LOGS E ARQUIVOS TEMPORÁRIOS
+# =======================================================
+*.log
+*.tmp
+*.temp
+tmp/
+temp/
+
+# =======================================================
+# CONFIGURAÇÕES DE IDE E SISTEMA OPERACIONAL
+# =======================================================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+desktop.ini
