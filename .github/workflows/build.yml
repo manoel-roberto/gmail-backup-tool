@@ -25,7 +25,7 @@ jobs:
             dist_path: dist/GmailBackup-Windows.exe
             pyinstaller_cmd: pyinstaller --clean --onefile --noconsole --name "GmailBackup-Windows" app.py
 
-          - os: ubuntu-latest
+          - os: ubuntu-22.04
             target_os: Linux
             output_name: GmailBackup-Linux
             dist_path: dist/GmailBackup-Linux
